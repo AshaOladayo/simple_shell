@@ -124,7 +124,7 @@ int get_alias(AndyBis_shInfo *shell, char *arg)
 {
 	char *value = NULL;
 
-	if (!(add_or_update_alias(&the_alias shell *head, arg)))
+	if (!(add_or_update_alias(shell->alias, arg)))
 	{
 		return (-1);
 	}
@@ -132,19 +132,16 @@ int get_alias(AndyBis_shInfo *shell, char *arg)
 
 	while (tempo != NULL)
 	{
-		if (AB_strcmp(arg, tempo->name)
-		{
+		if (strcmp(arg, tempo->name) == 0)
 			value = tempo->value;
-
 			break;
-		}
+	
 		tempo = tempo->next;
-
 	}
 
 	if (value == NULL)
 		return (-1);
-	write(STDOUT_FILENO, value, my_strlen(value));
+	write(STDOUT_FILENO, value, AB_strlen(value));
 	write(STDOUT_FILENO, "\n", 1);
 	return (0);
 }
@@ -158,7 +155,8 @@ int get_alias(AndyBis_shInfo *shell, char *arg)
  */
 int aliascommand(AndyBis_shInfo *shell)
 {
-	int i, j, check, retu = 0;
+	int i, j, check  = 0;
+	the_alias *retu = NULL;
 
 	if (!shell->arr[1])
 	{
@@ -174,16 +172,17 @@ int aliascommand(AndyBis_shInfo *shell)
 				if (shell->arr[i][j] == '=')
 				{
 					check = 1;
-					retu = add_or_update_alias(&the_alias shell *head, shell->arr[i]);
+					retu = add_or_update_alias(shell->alias, shell->arr[i]);
+
 					break;
 				}
 			}
 			if (check == 0)
 			{
-				retu = get_alias(shell, shell->arr[i]);
+				get_alias(shell, shell->arr[i]);
 			}
 		}
 	}
-	return (retu);
+	return (0);
 }
 

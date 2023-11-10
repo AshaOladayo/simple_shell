@@ -1,4 +1,36 @@
 #include "shell.h"
+/**
+ * exitShell - Exit the shell
+ * @shell: Shell data
+ *
+ * Return: Exits with the status of the shell or 0 if none is specified
+ */
+int exitShell(AndyBis_shInfo *shell)
+ {
+    int exitStat = shell->stat;
+
+    if (shell->interact == 1)
+     {
+        if (!strcmp("exit", shell->arr[0]) && shell->arr[1]) 
+            shell->stat = AB_atoi(shell->arr[1]);
+            exitStat = shell->stat;
+        
+    }
+    if (shell->path)
+        freeList(shell->path);
+    if (shell->alias)
+        freeAlias(shell->alias);
+    if (shell->av)
+        freeArray(shell->av);
+    if (shell->_envir)
+        freeArray(shell->_envir);
+    if (shell->arr && shell->interact == 1)
+        freeArray(shell->arr);
+    if (shell->line)
+        free(shell->line);
+    exit(exitStat);
+}
+
 
 /**
  * changeDir - Change the working directory of the shell

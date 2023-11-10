@@ -141,6 +141,7 @@ int aliascommand(AndyBis_shInfo *);
 char *AndyBis_getenv(AndyBis_shInfo *, char *);
 char *AB_strdup(char *);
 char *AB_itoa(int);
+int AB_atoi(char *);
 int AB_strcmp( char *,  char *);
 char *AB_strcpy(char *,  char *);
 char *AB_Strcat(char *,  char *);

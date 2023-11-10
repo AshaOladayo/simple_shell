@@ -41,13 +41,12 @@ int main(int ac, char *av[], char *env[])
 		shell._envir[i] = AB_strdup(environ[i]);
 	}
 	shell._envir[i] = NULL;
-	for (;;)
-	{
-		if (!isatty(STDIN_FILENO))
-			noTer_interact(&shell);
-		else if (isatty(STDIN_FILENO))
-			Terinteract(&shell);
-	}
+		
+	if (!isatty(STDIN_FILENO))
+		noTer_interact(&shell);	
+	else if (isatty(STDIN_FILENO))
+		Terinteract(&shell);
+
 	freeArray(shell.av);
 	freeArray(shell._envir);
 	return (0);

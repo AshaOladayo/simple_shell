@@ -83,7 +83,7 @@ the_path *path_to_list(AndyBis_shInfo *shell)
 
         if (envCopy == NULL)
         {
-            free_path_list(head);
+            freeList(head);
             return NULL;
         }
 
