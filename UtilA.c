@@ -89,10 +89,8 @@ char *AB_itoa(int n)
 
 		lent--;
 	}
-	while (n1 > 0)
-	{
-		return (buffer);
-	}
+	while (n1 > 0);
+	return (buffer);
 }
 
 /**
@@ -111,11 +109,10 @@ char *AndyBis_getenv(AndyBis_shInfo *shell, char *name)
 		errno = EINVAL;
 	return (NULL);
 	char *result = NULL;
+	char *envVar;
 
 	for (int i = 0; shell->_envir[i] != NULL; i++)
 	{
-		char *envVar;
-
 		envVar = AB_strdup(shell->_envir[i]);
 
 		if (envVar == NULL)
