@@ -11,7 +11,7 @@
  * execution.
  */
 
-int carrycmd(char **arr, AndyBis_shInfo *shell)
+int carrycmd(AndyBis_shInfo *shell)
 {
 	const char *commands[] = {"exit",
 		"env", "set", "unset", "cd", "alias"};

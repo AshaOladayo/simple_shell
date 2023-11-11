@@ -85,7 +85,7 @@ void prmptAndyBishell(void);
 
 /* Builtins */
 
-int carrycmd(char **, AndyBis_shInfo *);
+int carrycmd(AndyBis_shInfo *);
 int ifAliasCmd(AndyBis_shInfo *);
 
 

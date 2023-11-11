@@ -28,11 +28,11 @@ char *Terinteract(AndyBis_shInfo *shell)
 		return (NULL);
 		Dothers(shell);
 
-		builtnfun = carrycmd(shell->arr, shell);
+		builtnfun = carrycmd(shell);
 
 		if (builtnfun != 0)
 		{
-			shell->stat = carrycmd(shell->arr, shell);
+			shell->stat = carrycmd(shell);
 			if (shell->arr != NULL)
 				freeArray(shell->arr);
 			shell->builtn = 1;

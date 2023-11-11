@@ -53,7 +53,8 @@ void handlectrlC(int signum)
 {
 	if (signum == SIGINT)
 		write(1, "\n", 1);
-	char *cmd = NULL;
+	char *cmd;
+	cmd= NULL;
 }
 
 /**
