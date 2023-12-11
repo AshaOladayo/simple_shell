@@ -57,18 +57,16 @@ int parse_alias(char* arg, char **name,
 
   int add_or_update_alias(AndyBis_shInfo *shell, the_alias **head, char *arg) {
     char *name = NULL, *value = NULL;
-    parse_alias(arg, &name, &value);
     if (parse_alias(arg, &name, &value) != 0) {
-    // Handle parse_alias failure
-    return -1;
-}
+        // Handle parse_alias failure
+        return -1;
+    }
 
     if (name == NULL || value == NULL) {
         // Handle invalid input
         return -1;
     }
 
-    the_alias *temp = *head;
     the_alias *new_alias = malloc(sizeof(the_alias));
 
     if (new_alias == NULL) {
@@ -92,45 +90,34 @@ int parse_alias(char* arg, char **name,
         return -1;
     }
 
-    // Update an existing alias if found
-    while (temp != NULL) {
-        if (strcmp(temp->name, new_alias->name) == 0) {
-            // Existing alias found, update its value
-            free(temp->value);
-            temp->value = strdup(value);
-            free(name);
-            free(value);
-            free(new_alias->name);
-            free(new_alias->value);
-            free(new_alias);
-            return 0;
-        }
+    the_alias *temp = *head;
+    the_alias *prev = NULL;
 
-        if (temp->next == NULL || strcmp(temp->next->name, new_alias->name) == 0) {
-            // Add the new alias to the end of the list
-            if (temp->next == NULL) {
-                temp->next = new_alias;
-            } else {
-                free(new_alias->name);
-                free(new_alias->value);
-                free(new_alias);
-            }
-            free(name);
-            free(value);
-            return 0;
-        }
-
+    // Iterate through the list to find the alias
+    while (temp != NULL && strcmp(temp->name, new_alias->name) != 0) {
+        prev = temp;
         temp = temp->next;
     }
 
-    if (*head == NULL) {
-        *head = new_alias;
+    if (temp != NULL) {
+        // Existing alias found, update its value
+        free(temp->value);
+        temp->value = strdup(value);
+    } else {
+        // Alias not found, add the new alias to the end of the list
+        if (prev != NULL) {
+            prev->next = new_alias;
+        } else {
+            // If the list is empty, set the new alias as the head
+            *head = new_alias;
+        }
     }
 
     free(name);
     free(value);
     return 0;
 }
+
 
 
 int set_alias(AndyBis_shInfo *shell)
