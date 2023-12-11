@@ -106,12 +106,12 @@ int print_all_aliases(AndyBis_shInfo *shell)
 {
 	int fd = fileno(stdout);
 	the_alias *current = shell->alias;
+	set_alias(shell);
 	if (!current)
 	{
-		write(STDERR_FILENO, shell->av[0], strlen(shell->av[0]));
-		write(STDERR_FILENO, ": ", 2);
-		write(STDERR_FILENO, shell->arr[1], strlen(shell->arr[1]));
-		write(STDERR_FILENO, " not found\n", 11);
+		write(fd, shell->av[0], strlen(shell->av[0]));
+		write(fd, ": ", 2);
+		write(fd, " is null\n", 9);
 		return 1;
 	}
 	else
@@ -185,7 +185,7 @@ int get_alias(AndyBis_shInfo *shell, char *arg)
  */
 int aliascommand(AndyBis_shInfo *shell) {
     int i, j, check = 0;
-
+    shell->alias = NULL;
     if (!shell->arr[1]) {
         print_all_aliases(shell);
     } else {

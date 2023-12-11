@@ -54,7 +54,9 @@ void Terinteract(AndyBis_shInfo *shell)
     // Print the linked list starting from the first node
    /* print_all_aliases(shell, shell->alias);*/
 
-	       aliascommand(shell);
+	       /*aliascommand(shell);*/
+	
+		print_all_aliases(shell);
                /* int result = func.f_ptr(shell);*/ 
 	}
 }
