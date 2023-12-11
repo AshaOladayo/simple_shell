@@ -14,7 +14,7 @@ void freeList(the_path *head)
 
 		head = head->next;
 
-		free(tempo->path);
+		free(tempo->strng);
 		free(tempo);
 	}
 }

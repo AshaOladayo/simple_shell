@@ -9,15 +9,16 @@
  * Return: (A pointer to t
  * he newly created node, or NULL on failure).
  */
-the_path *create_node(const char *str) {
+the_path *create_node(char *str) {
     the_path *newNode = malloc(sizeof(the_path));
     
     if (!newNode)
         return (NULL);
     
-    newNode->path = strdup(str);
+    newNode->strng = strdup(str);
     
-    if (newNode->path == NULL) {
+    if (newNode->strng == NULL)
+    {
         free(newNode);
         return (NULL);
     }
@@ -37,28 +38,34 @@ the_path *create_node(const char *str) {
  * added to the end of the list.
  */
 
-void add_node_end(the_path **head, the_path *new_node)
+the_path *add_node_end(the_path **head, the_path *new_node, char *str)
 {
-    if (!new_node)
-    {
-        return;
-    }
-
-    new_node->next = NULL;
-
+ the_path *tempo;
+new_node = create_node(str);
+new_node->next = NULL;
     if (!*head)
     {
         *head = new_node;
     }
+    if (!new_node)
+    {
+        return (*head);
+    }
+    if (!*head && !new_node)
+    {
+	    return (NULL);
+    }
     else
     {
-        the_path *tempo = *head;
+	    
+        tempo = *head;
         while (tempo->next)
         {
             tempo = tempo->next;
         }
         tempo->next = new_node;
     }
+    return (*head);
 }
 
 
@@ -94,7 +101,7 @@ the_path *path_to_list(AndyBis_shInfo *shell)
 
             if (newNode)
             {
-                add_node_end(&head, newNode);
+                add_node_end(&head, newNode,token);
             }
 
             token = strtok(NULL, ":");
@@ -108,10 +115,10 @@ the_path *path_to_list(AndyBis_shInfo *shell)
 
     if (newNode)
     {
-        add_node_end(&head, newNode);
+        add_node_end(&head, newNode, pwd);
     }
-
-    return head;
+free (pwd);
+    return (head);
 }
 
 
@@ -124,18 +131,19 @@ the_path *path_to_list(AndyBis_shInfo *shell)
  */
 char *searchPathforfile(the_path *list, char *file)
 {
-	char *result = NULL;
+char *result = NULL;
 
 	if (list == NULL)
 	{
 		return (NULL);
+	}
 
 		the_path *tempo = list;
 		struct stat s;
 
 		while (tempo)
 		{
-			size_t path_length = strlen(tempo->path) + 1 + strlen(file) + 1;
+			size_t path_length = strlen(tempo->strng) + 1 + strlen(file) + 1;
 			char *path = malloc(path_length);
 
 			if (path == NULL)
@@ -145,7 +153,7 @@ char *searchPathforfile(the_path *list, char *file)
 				return (NULL);
 			}
 
-			AB_strcpy(path, tempo->path);
+			AB_strcpy(path, tempo->strng);
 			AB_Strcat(path, "/");
 			AB_Strcat(path, file);
 
@@ -161,5 +169,4 @@ char *searchPathforfile(the_path *list, char *file)
 		}
 
 		return (result);
-	}
 }

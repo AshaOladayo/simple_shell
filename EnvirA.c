@@ -12,14 +12,16 @@ int exitShell(AndyBis_shInfo *shell)
     if (shell->interact == 1)
      {
         if (!strcmp("exit", shell->arr[0]) && shell->arr[1]) 
-            shell->stat = AB_atoi(shell->arr[1]);
-            exitStat = shell->stat;
+	{
+		shell->stat = atoi(shell->arr[1]);
+		exitStat = shell->stat;
+	}
         
     }
     if (shell->path)
         freeList(shell->path);
     if (shell->alias)
-        freeAlias(shell->alias);
+        free(shell->alias);
     if (shell->av)
         freeArray(shell->av);
     if (shell->_envir)
@@ -29,6 +31,7 @@ int exitShell(AndyBis_shInfo *shell)
     if (shell->line)
         free(shell->line);
     exit(exitStat);
+    return (0);
 }
 
 

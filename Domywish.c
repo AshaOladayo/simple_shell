@@ -8,41 +8,55 @@
  * This function reads and processes
  * user input in an interactive loop.
  * It handles Ctrl+C signals, reads commands, removes comments and
- * unnecessary whitespace, and tokenizes the input.
+ *  and tokenizes the input.
  *
  * Return: A dynamically allocated array
  * of strings containing the tokens
  * from the user's input, or (NULL) on error.
  */
-char **domywish(void)
-{
-	signal(SIGINT, handlectrlC);
-	size_t n = BUFSIZE;
-	char *buffer = NULL;
-	char *commnd, *cmd;
-	char **arr = NULL;
+char **domywish(AndyBis_shInfo *shell, char *buffer, int **n) {
+    char *commnd, *cmd;
+    char **tokens = NULL;
 
-	while (1)
-	{
-		/* Read a line of input from the user */
-		cmd = bisgetline(&buffer, &n, stdin);
-		commnd = rmComment_nd_Space(&cmd);
-		if (commnd == NULL)
-		{
-			free(buffer);
-			break;
-		}
-		if (commnd[0] == '\0' || strcmp(commnd, "\n")
-				== 0 || strcmp(commnd, "\t") == 0
-				|| strcmp(commnd, " ") == 0)
-			continue;
-		arr = BreakIntoTokens(commnd, DELIM_T);
+    // Allocate memory for commnd
+    commnd = malloc(sizeof(char) * BUFSIZE);
+    if (commnd == NULL) {
+        perror("Error allocating memory for commnd");
+        exit(EXIT_FAILURE);
+    }
 
-		free(buffer);
-		free(commnd);
-		free(cmd);
-	}
-	return (arr);
+    // Read a line from stdin using bisgetline
+    cmd = bisgetline(stdin);
+
+    // Remove comments and trim spaces
+    commnd= rmComment(cmd);
+    size_t len = strlen(commnd);
+    *n = (int *)len;
+    
+
+    // Allocate memory for buffer and copy cleanCmd into it
+    if (buffer == NULL) {
+        perror("Error allocating memory for buffer");
+        free(commnd);  // Free the cleaned command
+        exit(EXIT_FAILURE);
+    }
+
+    // Check if cleanCmd is empty
+    if (commnd == NULL || strcmp(commnd, "\n") == 0 || strcmp(commnd, "\t") == 0 || strcmp(commnd, " ") == 0) {
+        free(cmd);
+        free(commnd);
+        free(buffer);
+        return NULL;  // Return NULL or handle this case accordingly
+    }
+
+    // Break the command into tokens
+    tokens = BreakIntoTokens(commnd);
+
+    // Free allocated memory
+    free(commnd);
+    free(cmd);
+
+    return tokens;
 }
 
 /**
@@ -53,61 +67,26 @@ void handlectrlC(int signum)
 {
 	if (signum == SIGINT)
 		write(1, "\n", 1);
-	char *cmd;
-	cmd= NULL;
-}
-
-/**
- * bisgetline - Read a line from a file stream or stdin.
- * @lineptr: A pointer to a buffer to store the read line.
- * @n: A pointer to the size of the buffer.
- * @stream: The file stream to read from.
- *
- * Return: A dynamically allocated
- * buffer containing the read line, or (NULL) on error
- */
-
-char *bisgetline(char **lineptr, size_t *n, FILE *stream)
-{
-	if (lineptr == NULL || n == NULL)
-		return (NULL);
-
-	if (*n < BUFSIZE)
-		*n = BUFSIZE;
-
-	char *Dbuf = *lineptr ? *lineptr : malloc(*n);
-
-	if (Dbuf == NULL)
-		return (NULL);
-	size_t countIn = 0; 
-	int a;
-
-	while ((a = fgetc(stream)) != EOF && a != '\n')
-	{
-		if (countIn + 1 >= *n)
-			*n *= 2;
-		char *newDBuf = realloc(Dbuf, *n);
-
-		if (newDBuf == NULL)
-			free(Dbuf);
-		return (NULL);
-		Dbuf = newDBuf;
-
-		Dbuf[countIn++] = a;
-	}
-	if (countIn == 0 && a == EOF)
-		free(Dbuf);
-	return (NULL);
-	Dbuf[countIn] = '\0';
-	*lineptr = Dbuf;
-
-	return (Dbuf);
+	exit(0);
 }
 
 
+int ifwhitespace(char *strng) {
+    while (*strng) {
+        if (!isspace(*strng)) {
+            return 0; // Non-whitespace character found
+        }
+        strng++;
+    }
+    return 1; // All characters are whitespace
+}
+
+
+
+
 /**
- * rmComment_nd_Space - Remove
- * comments and spaces from a string.
+ * rmComment - Remove
+ * comments from a string.
  * @buffer: Pointer to a string buffer to process.
  *
  * This function removes comments
@@ -116,34 +95,101 @@ char *bisgetline(char **lineptr, size_t *n, FILE *stream)
  * Return: On success, returns the
  * modified string. On failure, returns (NULL).
  */
-char *rmComment_nd_Space(char **buffer)
+char *rmComment(char *buffer) {
+    if (buffer == NULL) {
+        return NULL;
+    }
+
+    // Duplicate the input buffer
+    char *buf = strdup(buffer);
+
+    // Check if strdup failed
+    if (buf == NULL) {
+        return NULL;
+    }
+// Remove leading whitespaces
+    while (isspace((unsigned char)*buf)) {
+        buf++;
+    }
+
+    // Find the first occurrence of '#' in the duplicated buffer
+    char *commentStart = strchr(buf, '#');
+
+    // If '#' is found, replace it and everything after with an empty string
+    if (commentStart != NULL) {
+        *commentStart = '\0';
+    }
+
+    // Find the first occurrence of '\n' in the modified buffer
+    char *newline = strchr(buf, '\n');
+
+    // If '\n' is found, replace it with '\0'
+    if (newline != NULL) {
+        *newline = '\0';
+    }
+
+    // No need to free the original buffer, as it is not dynamically allocated
+
+    return buf;
+}
+
+
+
+/**
+ * bisgetline - Read a line from a file stream or stdin.
+ * @buffer: A pointer to a buffer to store the read line.
+ * @n: A pointer to the size of the buffer.
+ * @stream: The file stream to read from.
+ *
+ * Return: A dynamically allocated
+ * buffer containing the read line, or (NULL) on error
+ */
+char *bisgetline(FILE *stream)
 {
-	if (buffer == NULL)
+        int i = 0;
+        ssize_t nread;
+        int fd;
+        char c = 0, *buffer = malloc(sizeof(char) * BUFSIZE);
+        while (c != EOF && c != '\n')
+        {
+                fd = fileno(stream);
+                nread = read(fd, &c, 1);
+                if (nread == 0 || nread == -1)
+                {
+                        free(buffer);
+                        if (nread == 0)
+                                exit(0);
+                        if (nread == -1)
+				    perror("Error: ");
+                }
+                buffer[i] = c;
+                if (buffer[0] == '\0')
+                {
+                        free(buffer);
+                        return ("\n");
+                }
+                if (i + 1 >= BUFSIZE)
+                {
+                        buffer = realloc(buffer, i + 1);
+                        if (buffer == NULL)
+                        {
+                                free(buffer);
+                                return (NULL);
+                        }
+                }
+                i++;
+        }
+        buffer[i - 1] = '\0';
+	if (ifwhitespace(buffer))
 	{
-		return (NULL);
+		free(buffer);
+		return ("\n");
 	}
-
-	char *buf = AB_strdup(*buffer);
-
-	if (buf == NULL)
-	{
-		return (NULL);
-	}
-
-	for (int i = 0; buf[i] != '\0'; i++)
-	{
-		if (buf[i] == '#')
-		{
-			buf[i] = '\n';
-			break;
-		}
-	}
-
-	return (buf);
+return (buffer);
 }
 
 /**
- * BreakIntoTokens - Tokenize a i
+ * BreakIntoTokens - Tokenize a 
  * string using a delimiter.
  * @buffer: The input string to tokenize.
  * @delimiter: The delimiter used for tokenization.
@@ -152,46 +198,69 @@ char *rmComment_nd_Space(char **buffer)
  * (NULL) on failure. The last element of the
  * array is (NULL).
  */
-char **BreakIntoTokens(char *buffer,
-		char *delimiter)
-{
-	if (buffer == NULL || delimiter == NULL)
-		return (NULL);
-	char *bufdup = strdup(buffer);
 
-	if (bufdup == NULL)
-		return (NULL);
-	char **tokns = malloc(2 * sizeof(char *));
+char **BreakIntoTokens(char *buffer) {
+    char *token;
+    char *remainder;
+    char **arrToks = NULL;
+    int i = 0;
 
-	if (tokns == NULL)
-	{
-		free(bufdup);
-		return (NULL);
-	}
-	int use = 0;
+    if (buffer == NULL) {
+        perror("Input buffer is NULL");
+        return NULL;
+    }
 
-	for (char *tokn = strtok(bufdup, delimiter);
-			tokn != NULL; tokn = strtok(NULL, delimiter))
-	{
-		if (strcmp(tokn, "/0") == 0
-				|| strcmp(tokn, "/n") == 0)
-			free(tokn);
-		else
-		{
-			tokns[use] = strdup(tokn);
-			if (tokns[use] == NULL)
-			{
-				free(bufdup);
-				for (int i = 0; i < use; i++)
-					free(tokns[i]);
-				free(tokns);
-				return (NULL);
-			}
-			use++;
-		}
-	}
-	tokns[use] = NULL;
+    // Duplicate the input buffer to avoid modifying the original string
+    char *str = strdup(buffer);
+    char *rmstr = strdup(buffer);
+    if (str == NULL) {
+        perror("Error duplicating input buffer");
+        return NULL;
+    }
 
-	free(bufdup);
-	return (tokns);
+    // Allocate memory for the array of pointers
+    arrToks = malloc(2 * sizeof(char *));
+    if (arrToks == NULL) {
+        perror("Error allocating memory for arrToks");
+        free(str);
+        return NULL;
+    }
+
+    // Allocate memory for the first token
+    
+    token = strtok(str, " ");
+    while (token != NULL) {
+        // Allocate memory for the current token
+        arrToks[i] = strdup(token);
+	if (arrToks[i] == NULL) {
+        perror("Error allocating memory for the first token");
+        freeTokens(arrToks, i + 1);  // Free allocated memory before exit
+        free(str);
+        return NULL;
+    }
+
+    // Allocate memory for the remainder
+    remainder = strstr(rmstr, " ");
+    remainder += strlen(" ") ;
+    arrToks[i + 1] = strdup(remainder);
+    if (arrToks[i + 1] == NULL) {
+        perror("Error allocating memory for the remainder");
+        freeTokens(arrToks, i + 1);  // Free allocated memory before exit
+        free(rmstr);
+        return NULL;
+    }
+
+    free(str);  
+    free(rmstr);// Free the duplicated string
+    return arrToks;
 }
+}
+
+// Function to free the allocated memory for the array of pointers
+void freeTokens(char **arrToks, int size) {
+    for (int i = 0; i < size; i++) {
+        free(arrToks[i]);
+    }
+    free(arrToks);
+}
+

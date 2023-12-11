@@ -5,7 +5,6 @@
  * on the given input.
  * @shell: A pointer to the shell data
  * structure.
- *
  * Return: An integer representing the
  * success or failure of the command
  * execution.
@@ -13,9 +12,10 @@
 
 int carrycmd(AndyBis_shInfo *shell)
 {
-	const char *commands[] = {"exit",
-		"env", "set", "unset", "cd", "alias"};
-	int (*f_ptr[])(AndyBis_shInfo *) ={
+	int result;
+       	char *commands[7] = {"exit",
+		"env", "set", "unset", "cd", "alias", "NULL"};
+       int(*f_ptr[7])(AndyBis_shInfo *shell) = {
 		exitShell,
 		printEnvir,
 		setEnvir,
@@ -26,25 +26,14 @@ int carrycmd(AndyBis_shInfo *shell)
 	};
 	int i;
 
-	for (i = 0; i < 6; i++)
+	for (i = 0; i < 7; i++)
 	{
 		if (strcmp(shell->arr[0], commands[i]) == 0)
 		{
-			break;
+			result = f_ptr[i](shell);
 		}
 	}
-
-	if (i < 6)
-	{
-		int result = f_ptr[i](shell);
-
-		return (result);
-	}
-	else
-	{
-
-		return (-1);
-	}
+	return (result);
 }
 
 
@@ -70,7 +59,7 @@ int ifAliasCmd(AndyBis_shInfo *shell)
 					shell->arr[0]) == 0)
 		{
 			len = AB_strlen(tempo->value);
-			command = malloc(sizeof(char) *
+			command = malloc(sizeof(char *) *
 					(len - 1));
 
 			if (command == NULL)
