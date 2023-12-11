@@ -9,134 +9,92 @@
  *
  * Return: 0 on success, -1 on failure
  */
-int parse_alias(char* arg, char **name,
-		char **value) 
-{
-    if (arg == NULL || name == NULL || 
-		    value == NULL)
-	    return 0; 
+
+int parse_alias(char *arg, char **name, char **value) {
+    if (arg == NULL || name == NULL || value == NULL)
+        return 0;
 
     char *equalSign = strchr(arg, '=');
 
-    if (equalSign == NULL) 
-        return -1; 
-    
+    if (equalSign == NULL)
+        return -1;
+
     size_t name_length = equalSign - arg;
 
     *name = malloc(name_length + 1);
 
-    if (*name == NULL)
-        return -1; 
+    if (*name == NULL) {
+        perror("Error allocating memory for name");
+        return -1;
+    }
+
     strncpy(*name, arg, name_length);
-    (*name)[name_length] = '\0'; 
+    (*name)[name_length] = '\0';
 
     equalSign++;
-    // Allocate memory for the value
     *value = strdup(equalSign);
 
-    if (*value == NULL) 
-    {
+    if (*value == NULL) {
+        perror("Error allocating memory for value");
         free(*name);
-	free(*value);
-        return -1; 
-    }
-    return 0; // Successfully 
-}
-
-
-
-
-/**
- * add_or_update_alias -create,Add or
- * update an alias in the alias list.
- * @head: The head of the alias list.
- * @arg: The argument containing the alias name and value.
- *
- * Return: A pointer to the updated alias list
- */
-
-  int add_or_update_alias(AndyBis_shInfo *shell, the_alias **head, char *arg) {
-    char *name = NULL, *value = NULL;
-    if (parse_alias(arg, &name, &value) != 0) {
-        // Handle parse_alias failure
         return -1;
     }
 
-    if (name == NULL || value == NULL) {
-        // Handle invalid input
-        return -1;
-    }
-
-    the_alias *new_alias = malloc(sizeof(the_alias));
-
-    if (new_alias == NULL) {
-        // Handle memory allocation failure
-        free(name);
-        free(value);
-        return -1;
-    }
-
-    new_alias->name = strdup(name);
-    new_alias->value = strdup(value);
-    new_alias->next = NULL;
-
-    if (new_alias->name == NULL || new_alias->value == NULL) {
-        // Handle memory allocation failure
-        free(new_alias->name);
-        free(new_alias->value);
-        free(new_alias);
-        free(name);
-        free(value);
-        return -1;
-    }
-
-    the_alias *temp = *head;
-    the_alias *prev = NULL;
-
-    // Iterate through the list to find the alias
-    while (temp != NULL && strcmp(temp->name, new_alias->name) != 0) {
-        prev = temp;
-        temp = temp->next;
-    }
-
-    if (temp != NULL) {
-        // Existing alias found, update its value
-        free(temp->value);
-        temp->value = strdup(value);
-    } else {
-        // Alias not found, add the new alias to the end of the list
-        if (prev != NULL) {
-            prev->next = new_alias;
-        } else {
-            // If the list is empty, set the new alias as the head
-            *head = new_alias;
-        }
-    }
-
-    free(name);
-    free(value);
     return 0;
 }
 
 
-
-int set_alias(AndyBis_shInfo *shell)
+the_alias *add_or_update_alias(the_alias *head, char *name, char *value) 
 {
-    if (add_or_update_alias(shell, &shell->alias, shell->arr[1]) == 0)
-    {
-        // Alias added or updated successfully
-        return 0;
+    the_alias *current = head;
+    the_alias *prev = NULL;
+
+    while (current != NULL) {
+        if (strcmp(current->name, name) == 0) 
+	{
+            free(current->value);
+            current->value = strdup(value);
+            return head;
+        }
+        prev = current;
+        current = current->next;
     }
-    else
+
+    the_alias *new_alias = malloc(sizeof(the_alias));
+
+    if (new_alias == NULL) 
     {
-        write(STDERR_FILENO, shell->av[0], strlen(shell->av[0]));
-        write(STDERR_FILENO, ": Unable to add alias\n", 22);
-        return 1;
+        perror("Error allocating memory for new_alias");
+        return head;  
     }
+
+    new_alias->name = strdup(name);
+    new_alias->value = strdup(value);
+    new_alias->next = head;  
+    return new_alias;  
 }
 
 
 
+int set_alias(AndyBis_shInfo *shell) {
+    char *value, *name = NULL;
+
+    if (parse_alias(shell->arr[1], &name, &value) != 0) {
+        // Handle parse_alias failure
+        write(STDERR_FILENO, shell->av[0], strlen(shell->av[0]));
+        write(STDERR_FILENO, ": Unable to parse alias\n", 24);
+        return 1;
+    }
+
+    // Update the alias list
+    shell->alias = add_or_update_alias(shell->alias, name, value);
+
+    // Free memory used for name and value
+    free(name);
+    free(value);
+
+    return 0;
+}
 
 
 /**
@@ -146,28 +104,26 @@ int set_alias(AndyBis_shInfo *shell)
  */
 int print_all_aliases(AndyBis_shInfo *shell)
 {
-    the_alias *current = shell->alias;  // Use the head of the linked list directly
-
-    if (!current)
-    {
-        write(STDERR_FILENO, shell->av[0], strlen(shell->av[0]));
-        write(STDERR_FILENO, ": ", 2);
-        write(STDERR_FILENO, shell->arr[1], strlen(shell->arr[1]));
-        write(STDERR_FILENO, " not found\n", 11);
-        return 1;
-    }
-
-    int fd = fileno(stdout);
-
-    while (current != NULL)
-    {
-        write(fd, current->name, strlen(current->name));
-        write(fd, "=", 1);
-        write(fd, current->value, strlen(current->value));
-        write(fd, "\n", 1);
-        current = current->next;
-    }
-    return 0;
+	int fd = fileno(stdout);
+	the_alias *current = shell->alias;
+	if (!current)
+	{
+		write(STDERR_FILENO, shell->av[0], strlen(shell->av[0]));
+		write(STDERR_FILENO, ": ", 2);
+		write(STDERR_FILENO, shell->arr[1], strlen(shell->arr[1]));
+		write(STDERR_FILENO, " not found\n", 11);
+		return 1;
+	}
+	else
+		while (current != NULL)
+		{
+			write(fd, current->name, strlen(current->name));
+			write(fd, "=", 1);
+			write(fd, current->value, strlen(current->value));
+			write(fd, "\n", 1);
+			current = current->next;
+		}
+	return 0;
 }
 
 

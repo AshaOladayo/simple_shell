@@ -146,7 +146,7 @@ char *searchPathforfile(the_path *, char *);
 
 /* Alias */
 int parse_alias(char *arg, char **name, char **);
-int add_or_update_alias(AndyBis_shInfo *, the_alias **, char *);
+the_alias *add_or_update_alias(the_alias *, char *, char *);
 int set_alias(AndyBis_shInfo *);
 int print_all_aliases(AndyBis_shInfo *);
 int get_alias(AndyBis_shInfo *, char *);
