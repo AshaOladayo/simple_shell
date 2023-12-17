@@ -8,7 +8,7 @@
  * Return: void
  */
 
-void expandVar(AndyBis_shInfo *shell)
+void expandVar(AndyBis_sh *shell)
 {
     char *str, *value;
 

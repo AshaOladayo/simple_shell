@@ -14,7 +14,7 @@
  * of strings containing the tokens
  * from the user's input, or (NULL) on error.
  */
-char **domywish(AndyBis_shInfo *shell, char *buffer, int **n) {
+char **domywish(AndyBis_sh *shell, char *buffer, int **n) {
     char *commnd, *cmd;
     char **tokens = NULL;
 
@@ -96,8 +96,8 @@ int ifwhitespace(char *strng) {
  * modified string. On failure, returns (NULL).
  */
 char *rmComment(char *buffer) {
-    if (buffer == NULL) {
-        return NULL;
+    if (buffer == NULL || buffer == "\n") {
+        return (NULL);
     }
 
     // Duplicate the input buffer
@@ -128,8 +128,6 @@ char *rmComment(char *buffer) {
         *newline = '\0';
     }
 
-    // No need to free the original buffer, as it is not dynamically allocated
-
     return buf;
 }
 
@@ -150,15 +148,17 @@ char *bisgetline(FILE *stream)
         ssize_t nread;
         int fd;
         char c = 0, *buffer = malloc(sizeof(char) * BUFSIZE);
+	fd = fileno(stream);
+                if (fd == -1)
+			return(NULL);
         while (c != EOF && c != '\n')
         {
-                fd = fileno(stream);
-                nread = read(fd, &c, 1);
+		nread = read(fd, &c, 1);
                 if (nread == 0 || nread == -1)
                 {
                         free(buffer);
                         if (nread == 0)
-                                exit(0);
+                                return(NULL);
                         if (nread == -1)
 				    perror("Error: ");
                 }
@@ -199,61 +199,53 @@ return (buffer);
  * array is (NULL).
  */
 
-char **BreakIntoTokens(char *buffer) {
-    char *token;
-    char *remainder;
+char **BreakIntoTokens(char *buffer)
+{
+    char *Token, *str;
     char **arrToks = NULL;
     int i = 0;
 
-    if (buffer == NULL) {
-        perror("Input buffer is NULL");
-        return NULL;
+    if (buffer == NULL || buffer == "\n") 
+    {
+        perror("No Input");
+        return (NULL);
     }
+    str = strdup(buffer);
 
-    // Duplicate the input buffer to avoid modifying the original string
-    char *str = strdup(buffer);
-    char *rmstr = strdup(buffer);
-    if (str == NULL) {
+    if (str == NULL) 
+    {
         perror("Error duplicating input buffer");
-        return NULL;
+        return (NULL);
     }
-
-    // Allocate memory for the array of pointers
-    arrToks = malloc(2 * sizeof(char *));
-    if (arrToks == NULL) {
-        perror("Error allocating memory for arrToks");
+    arrToks = malloc(sizeof(char *));
+    if (arrToks == NULL) 
+    {
+        perror("Error allocating memory for tokens");
         free(str);
-        return NULL;
+        return (NULL);
     }
-
-    // Allocate memory for the first token
+    Token = strtok(str, " ");
+    arrToks[i] = strdup(Token);
     
-    token = strtok(str, " ");
-    while (token != NULL) {
-        // Allocate memory for the current token
-        arrToks[i] = strdup(token);
-	if (arrToks[i] == NULL) {
-        perror("Error allocating memory for the first token");
-        freeTokens(arrToks, i + 1);  // Free allocated memory before exit
-        free(str);
-        return NULL;
-    }
+    while (Token != NULL) 
+    { 
+	    Token = strtok(NULL, "");
 
-    // Allocate memory for the remainder
-    remainder = strstr(rmstr, " ");
-    remainder += strlen(" ") ;
-    arrToks[i + 1] = strdup(remainder);
-    if (arrToks[i + 1] == NULL) {
-        perror("Error allocating memory for the remainder");
-        freeTokens(arrToks, i + 1);  // Free allocated memory before exit
-        free(rmstr);
-        return NULL;
+	    if (Token ==  NULL)
+	    {
+		    free(str);
+		    free(Token);
+		    return (arrToks);
+	    }
+	    else
+	    {
+		    arrToks = realloc(arrToks, 2 * sizeof(char *));
+		    arrToks[i + 1] = strdup(Token); 
+	    }
     }
-
-    free(str);  
-    free(rmstr);// Free the duplicated string
-    return arrToks;
-}
+    free(str);
+    free(Token);
+    return (arrToks);
 }
 
 // Function to free the allocated memory for the array of pointers

@@ -8,15 +8,16 @@
  * It searches for the executable in the PATH, and if not found,
  * it handles built-in commands and executes external programs.
  */
-void noTer_interact(AndyBis_shInfo *shell)
+void noTer_interact(AndyBis_sh *shell)
 {
 	char *PATHs;
+	Initialize(shell);
 
 	shell->interact = 0;
 
 	for (;;)
 	{
-		PATHs = searchPathforfile(shell->path, shell->arr[0]);
+		PATHs = CheckPath(shell->path, shell->arr[0]);
 
 		if (!PATHs && shell->builtn == 0)
 		{
@@ -30,9 +31,7 @@ void noTer_interact(AndyBis_shInfo *shell)
 		shell->pid = fork();
 
 		if (shell->pid == 0)
-		{
 			executeIt(PATHs, shell);
-		}
 		else
 		{
 			wait(&shell->stat);

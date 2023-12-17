@@ -8,9 +8,9 @@
  * Return: void
  */
 
-int Dothers(AndyBis_shInfo *shell)
+int Dothers(AndyBis_sh *shell)
 {
-	aliascommand(shell);
+	AliasCommand(shell);
 	expandVar(shell);
 	return (0);
 }
@@ -103,7 +103,7 @@ char *AB_itoa(int n)
  * Return: A pointer to the value of i
  * the environment variable, or NULL if not found.
  */
-char *AndyBis_getenv(AndyBis_shInfo *shell, char *name)
+char *AndyBis_getenv(AndyBis_sh *shell, char *name)
 {
 	if (shell == NULL || name == NULL)
 		errno = EINVAL;

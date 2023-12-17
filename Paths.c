@@ -9,7 +9,7 @@
  * Return: (A pointer to t
  * he newly created node, or NULL on failure).
  */
-the_path *create_node(char *str) {
+the_path *MakeNode(char *str) {
     the_path *newNode = malloc(sizeof(the_path));
     
     if (!newNode)
@@ -38,10 +38,10 @@ the_path *create_node(char *str) {
  * added to the end of the list.
  */
 
-the_path *add_node_end(the_path **head, the_path *new_node, char *str)
+the_path *AddNode(the_path **head, the_path *new_node, char *str)
 {
  the_path *tempo;
-new_node = create_node(str);
+new_node = MakeNode(str);
 new_node->next = NULL;
     if (!*head)
     {
@@ -79,7 +79,7 @@ new_node->next = NULL;
  * of the linked list, or NULL on failure).
  */
 
-the_path *path_to_list(AndyBis_shInfo *shell)
+the_path *PathsList(AndyBis_sh *shell)
 {
     the_path *head = NULL;
 
@@ -97,11 +97,11 @@ the_path *path_to_list(AndyBis_shInfo *shell)
         char *token = strtok(envCopy, ":");
         while (token != NULL)
         {
-            the_path *newNode = create_node(token);
+            the_path *newNode = MakeNode(token);
 
             if (newNode)
             {
-                add_node_end(&head, newNode,token);
+               AddNode(&head, newNode,token);
             }
 
             token = strtok(NULL, ":");
@@ -111,11 +111,11 @@ the_path *path_to_list(AndyBis_shInfo *shell)
     }
 
     char *pwd = AndyBis_getenv(shell, "PWD");
-    the_path *newNode = create_node(pwd);
+    the_path *newNode = MakeNode(pwd);
 
     if (newNode)
     {
-        add_node_end(&head, newNode, pwd);
+	    AddNode(&head, newNode, pwd);
     }
 free (pwd);
     return (head);
@@ -129,7 +129,7 @@ free (pwd);
  * @file: The file to search for.
  * Return: A pointer to the full path name of the file, or NULL if not found.
  */
-char *searchPathforfile(the_path *list, char *file)
+char *CheckPath(the_path *list, char *file)
 {
 char *result = NULL;
 

@@ -15,6 +15,6 @@ void prmptAndyBishell(void)
 		initially = 0;
 
 	}
-	write(STDOUT_FILENO, "AndyBis$ ", 9);
+	write(STDOUT_FILENO, "VICTOR$ ", 8);
 
 }

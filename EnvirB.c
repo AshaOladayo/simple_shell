@@ -6,7 +6,7 @@
  *
  * Return: Variable with value
  */
-char *modEnvir(AndyBis_shInfo *shell)
+char *modEnvir(AndyBis_sh *shell)
 {
 	char *str;
 	int len1, len2;
@@ -31,8 +31,7 @@ char *modEnvir(AndyBis_shInfo *shell)
  *
  * Return: void
  */
-void modDir(AndyBis_shInfo *shell,
-		char *directory, char *newDirectory)
+void modDir(AndyBis_sh *shell, char *directory, char *newDirectory)
 {
 freeArray:(shell->arr);
 	shell->arr = malloc(sizeof(char *) * 4);
@@ -63,7 +62,7 @@ freeArray:(shell->arr);
  *
  * Return: 0 or 1
  */
-int cd_error(AndyBis_shInfo *shell, int n)
+int cd_error(AndyBis_sh *shell, int n)
 {
 	switch (n)
 	{

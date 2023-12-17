@@ -9,31 +9,30 @@
  * success or failure of the command
  * execution.
  */
-
-int carrycmd(AndyBis_shInfo *shell)
+int carrycmd(AndyBis_sh *shell, char *command)
 {
-	int result;
-       	char *commands[7] = {"exit",
-		"env", "set", "unset", "cd", "alias", "NULL"};
-       int(*f_ptr[7])(AndyBis_shInfo *shell) = {
-		exitShell,
-		printEnvir,
-		setEnvir,
-		unsetEnvir,
-		changeDir,
-		aliascommand,
-		NULL
-	};
-	int i;
+    char *commands[] = {
+        "exit", "env", "set", "unset", "cd", "alias"
+    };
 
-	for (i = 0; i < 7; i++)
-	{
-		if (strcmp(shell->arr[0], commands[i]) == 0)
-		{
-			result = f_ptr[i](shell);
-		}
-	}
-	return (result);
+    int (*f_ptr[6])(AndyBis_sh *shell) = {
+        exitShell,
+        printEnvir,
+        setEnvir,
+        unsetEnvir,
+        changeDir,
+        AliasCommand,
+    };
+
+    int numCommands = sizeof(commands) / sizeof(commands[0]);
+
+    for (int i = 0; i < numCommands; i++) {
+        if (strcmp(command, commands[i]) == 0) {
+            return f_ptr[i](shell);
+        }
+    }
+
+    return 1;
 }
 
 
@@ -47,9 +46,9 @@ int carrycmd(AndyBis_shInfo *shell)
  * Return: int
  */
 
-int ifAliasCmd(AndyBis_shInfo *shell)
+int ifAliasCmd(AndyBis_sh *shell)
 {
-	the_alias *tempo = shell->alias;
+	D_alias *tempo = shell->alias;
 	int i, j, len;
 	char *command;
 

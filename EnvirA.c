@@ -5,7 +5,7 @@
  *
  * Return: Exits with the status of the shell or 0 if none is specified
  */
-int exitShell(AndyBis_shInfo *shell)
+int exitShell(AndyBis_sh *shell)
  {
     int exitStat = shell->stat;
 
@@ -42,7 +42,7 @@ int exitShell(AndyBis_shInfo *shell)
  * Return: 0 on success, 1 on error
  */
 
-int changeDir(AndyBis_shInfo *shell)
+int changeDir(AndyBis_sh *shell)
 {
 	char *Npwd, *Opwd = AndyBis_getenv(shell, "PWD");
 
@@ -84,7 +84,7 @@ int changeDir(AndyBis_shInfo *shell)
  *
  * Return: 0
  */
-int printEnvir(AndyBis_shInfo *shell)
+int printEnvir(AndyBis_sh *shell)
 {
 	int i;
 
@@ -101,7 +101,7 @@ int printEnvir(AndyBis_shInfo *shell)
  *
  * Return: 0 on success, 12 if memory allocation fails
  */
-int setEnvir(AndyBis_shInfo *shell)
+int setEnvir(AndyBis_sh *shell)
 {
 	int i, j, m, use, done = 0;
 	char **Newenv;
@@ -148,7 +148,7 @@ int setEnvir(AndyBis_shInfo *shell)
  *
  * Return: 0 on success, 6 if the variable doesn't exist
  */
-int unsetEnvir(AndyBis_shInfo *shell) 
+int unsetEnvir(AndyBis_sh *shell) 
 {
 	int k;
 	if (shell->arr[1] == NULL) 

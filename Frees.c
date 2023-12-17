@@ -44,9 +44,9 @@ void freeArray(char **arr)
  *
  *  Return: void
  */
-void freeAlias(the_alias *head)
+void freeAlias(D_alias *head)
 {
-	the_alias *tempo = head, *sec;
+	D_alias *tempo = head, *sec;
 
 	if (head)
 	{
